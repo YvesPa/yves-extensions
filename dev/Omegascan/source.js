@@ -21584,7 +21584,7 @@ const OmegascanParser_1 = require("./OmegascanParser");
 exports.BASE_URL = 'https://omegascans.org';
 exports.API_URL = 'https://api.omegascans.org';
 exports.OmegascanInfo = {
-    version: '0.8.0',
+    version: '0.8.1',
     name: 'Omegascan',
     description: `Extension that pulls manga from ${exports.BASE_URL}`,
     author: 'YvesPa',
@@ -21636,16 +21636,16 @@ class Omegascan {
         return parseMethods.call(this.parser, data);
     }
     getMangaShareUrl(mangaId) {
-        const [_, slug] = (0, OmegascanHelper_1.convertMangaIdToIdSlug)(mangaId);
+        const slug = (0, OmegascanHelper_1.convertMangaIdToSlug)(mangaId);
         return `${exports.BASE_URL}/series/${slug}`;
     }
     getMangaDetails(mangaId) {
-        const [_, slug] = (0, OmegascanHelper_1.convertMangaIdToIdSlug)(mangaId);
+        const slug = (0, OmegascanHelper_1.convertMangaIdToSlug)(mangaId);
         return this.ExecRequest({ url: `${exports.BASE_URL}/series/${slug}` }, $ => this.parser.parseDetails($, mangaId));
     }
     async getChapters(mangaId) {
         const chapters = [];
-        const [id, _slug] = (0, OmegascanHelper_1.convertMangaIdToIdSlug)(mangaId);
+        const id = (0, OmegascanHelper_1.convertMangaIdToId)(mangaId);
         const params = { page: 1, perPage: 30, series_id: id };
         let hasMore = false;
         do {
@@ -21660,7 +21660,7 @@ class Omegascan {
         return chapters;
     }
     getChapterDetails(mangaId, chapterId) {
-        const [_id, slug] = (0, OmegascanHelper_1.convertMangaIdToIdSlug)(mangaId);
+        const slug = (0, OmegascanHelper_1.convertMangaIdToSlug)(mangaId);
         return this.ExecRequest({ url: `${exports.BASE_URL}/series/${slug}/${chapterId}` }, $ => this.parser.parseChapterDetails($, mangaId, chapterId));
     }
     getCarouselTitles() {
@@ -21761,12 +21761,17 @@ exports.Omegascan = Omegascan;
 },{"./OmegascanHelper":140,"./OmegascanParser":141,"@paperback/types":61,"cheerio":74}],140:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convertIdSlugToMangaId = exports.convertMangaIdToIdSlug = void 0;
-const convertMangaIdToIdSlug = (mangaId) => {
+exports.convertIdSlugToMangaId = exports.convertMangaIdToSlug = exports.convertMangaIdToId = void 0;
+const convertMangaIdToId = (mangaId) => {
     const tab = mangaId.split('$$');
-    return tab.length === 2 && tab[0] && tab[1] ? [tab[0], tab[1]] : [mangaId, mangaId];
+    return tab.length === 2 && tab[0] ? tab[0] : mangaId;
 };
-exports.convertMangaIdToIdSlug = convertMangaIdToIdSlug;
+exports.convertMangaIdToId = convertMangaIdToId;
+const convertMangaIdToSlug = (mangaId) => {
+    const tab = mangaId.split('$$');
+    return tab.length === 2 && tab[1] ? tab[1] : mangaId;
+};
+exports.convertMangaIdToSlug = convertMangaIdToSlug;
 const convertIdSlugToMangaId = (id, slug) => {
     return `${id}$$${slug}`;
 };
@@ -21819,8 +21824,8 @@ class WebtoonParser {
         });
     }
     parseNum(chapter_name) {
-        const numTab = chapter_name.split(' ');
-        return Number(numTab[numTab.length - 1]);
+        const numTab = chapter_name.trim().split(' ');
+        return Number(numTab[1]);
     }
     parseChapterDetails($, mangaId, chapterId) {
         const pages = $('#content div.container > div > img')
