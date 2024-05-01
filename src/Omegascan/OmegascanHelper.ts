@@ -43,9 +43,14 @@ export interface OmegascanMetadata
     last_page?: number
 }
 
-export const convertMangaIdToIdSlug = (mangaId: string): [id:string, slug: string] => {
+export const convertMangaIdToId = (mangaId: string): string => {
     const tab = mangaId.split('$$')
-    return tab.length === 2 && tab[0] && tab[1] ? [tab[0], tab[1]] : [mangaId, mangaId]
+    return tab.length === 2 && tab[0] ? tab[0] : mangaId
+}
+
+export const convertMangaIdToSlug = (mangaId: string): string => {
+    const tab = mangaId.split('$$')
+    return tab.length === 2 && tab[1] ? tab[1] : mangaId
 }
 
 export const convertIdSlugToMangaId = (id: number, slug: string): string => {

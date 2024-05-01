@@ -25,7 +25,7 @@ export const API_URL = 'https://api.omegascans.org'
 
 
 export const OmegascanInfo: SourceInfo = {
-    version: '0.8.0',
+    version: '0.8.1',
     name: 'Omegascan',
     description: `Extension that pulls manga from ${BASE_URL}`,
     author: 'YvesPa',
@@ -41,7 +41,8 @@ import * as cheerio from 'cheerio'
 import { 
     ChaptersListReturn, 
     OmegascanMetadata, 
-    convertMangaIdToIdSlug
+    convertMangaIdToId, 
+    convertMangaIdToSlug
 } from './OmegascanHelper'
 
 export abstract class Omegascan implements SearchResultsProviding, MangaProviding, ChapterProviding, HomePageSectionsProviding {
@@ -88,12 +89,12 @@ export abstract class Omegascan implements SearchResultsProviding, MangaProvidin
     }
 
     getMangaShareUrl(mangaId: string): string {
-        const [_, slug] = convertMangaIdToIdSlug(mangaId)
+        const slug = convertMangaIdToSlug(mangaId)
         return `${BASE_URL}/series/${slug}`
     }
 
     getMangaDetails(mangaId: string): Promise<SourceManga> {
-        const [_, slug] = convertMangaIdToIdSlug(mangaId)
+        const slug = convertMangaIdToSlug(mangaId)
         return this.ExecRequest(
             { url: `${BASE_URL}/series/${slug}` }, 
             $ => this.parser.parseDetails($, mangaId))
@@ -101,7 +102,7 @@ export abstract class Omegascan implements SearchResultsProviding, MangaProvidin
 
     async getChapters(mangaId: string): Promise<Chapter[]> {
         const chapters : Chapter[] = []
-        const [id, _slug] = convertMangaIdToIdSlug(mangaId)
+        const id = convertMangaIdToId(mangaId)
         const params = { page: 1, perPage: 30, series_id: id }
         let hasMore = false
 
@@ -122,7 +123,7 @@ export abstract class Omegascan implements SearchResultsProviding, MangaProvidin
     }
 
     getChapterDetails(mangaId: string, chapterId: string): Promise<ChapterDetails> {
-        const [_id, slug] = convertMangaIdToIdSlug(mangaId)
+        const slug = convertMangaIdToSlug(mangaId)
         return this.ExecRequest(
             { url: `${BASE_URL}/series/${slug}/${chapterId}` }, 
             $ => this.parser.parseChapterDetails($, mangaId, chapterId))

@@ -63,8 +63,8 @@ export class WebtoonParser {
     }
 
     parseNum(chapter_name: string) : number{
-        const numTab = chapter_name.split(' ')
-        return Number(numTab[numTab.length - 1])
+        const numTab = chapter_name.trim().split(' ')
+        return Number(numTab[1])
     }
   
     parseChapterDetails($: CheerioAPI, mangaId: string, chapterId: string): ChapterDetails {
